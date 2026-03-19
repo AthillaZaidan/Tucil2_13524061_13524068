@@ -51,9 +51,9 @@
 	}%
 	\fancyhead[R]{%
 		\begin{minipage}{9cm}
-			\raggedleft\bfseries Kode | Nama Mata Kuliah\\
-			\normalsize Laporan Akhir Tugas Besar X\\
-			Semester X 2025/2026
+			\raggedleft\bfseries IF2211 Strategi Algoritma\\
+			\normalsize Laporan Akhir Tugas Kecil 1\\
+			Semester II 2025/2026
 		\end{minipage}
 	}%
 	\renewcommand{\headrulewidth}{0.4pt}%
@@ -71,9 +71,9 @@
 
 \fancyhead[R]{%
 	\begin{minipage}{9cm}
-		\raggedleft\bfseries IF2123 Aljabar Linier dan Geometri\\
-		\normalsize Laporan Akhir Tugas Besar 2\\
-		\itshape Semester I 2025/2026
+		\raggedleft\bfseries IF2211 Strategi Algoritma\\
+		\normalsize Laporan Akhir Tugas Kecil 2\\
+		\itshape Semester II 2025/2026
 	\end{minipage}
 }
 
@@ -85,71 +85,68 @@
 \renewcommand{\footrulewidth}{0.4pt}
 
 \begin{document}
-	
-	\begin{titlepage}
-		\thispagestyle{empty}
-		\centering
-		
-		% ---------- Judul utama ----------
-		{\LARGE \textbf{Tugas Besar X}\par}
-		\vspace{0.2cm}
-		{\LARGE \textbf{(Nama Kelompok)}\par}
-		\vspace{0.8cm}
-		{\large (Kode | Nama Mata Kuliah)\par}
-		\vspace{0.2cm}
-		{\large (Judul Laporan)\par}
-		\vspace{0.2cm}
-		{\large Semester X Tahun 20XX/20XX\par}
-		
-		% ---------- Gambar tengah ----------
-		\vspace{1.8cm}
-		\includegraphics[width=0.9\textwidth]{foto-kelompok}\par
-		
-		% ---------- Disusun oleh ----------
-		\vspace{1.2cm}
-		{\bfseries Disusun oleh:\par}
-		\vspace{0.2cm}
-		\textbf{(Nama Kelompok)}
-		\vspace{0.5cm} \\
-		\begin{tabular}{l l}
-			XXXXXXXXXXXXXXXXXXXXXX & (YYYYYYYY) \\
-			XXXXXXXXXXXXXXXXXXXXXX & (YYYYYYYY) \\
-			XXXXXXXXXXXXXXXXXXXXXX & (YYYYYYYY) \\
-		\end{tabular}
-		
-		% ---------- Institusi ----------
-		\vspace{2.0cm}
-		Laboratorium Ilmu dan Rekayasa Komputasi\par
-		Program Studi Teknik Informatika\par
-		Sekolah Teknik Elektro dan Informatika\par
-		Institut Teknologi Bandung\par
-		
-	\end{titlepage}
-	
-	\clearpage
-	\pagestyle{fancy}
-	
-	\tableofcontents
-	\clearpage
-	
-	\chapter{Pendahuluan}
-	\input{sections/01-pendahuluan}
-	
-	\chapter{Dasar Teori}
-	\input{sections/02-dasar-teori}
-	
-	\chapter{Implementasi}
-	\input{sections/03-implementasi}
-	
-	\chapter{Eksperimen}
-	\input{sections/04-eksperimen}
-	
-	\chapter{Penutup}
-	\input{sections/05-penutup}
 
-	\chapter{Lampiran}
-	\input{sections/06-lampiran}
-	
-	\bibliography{dafpus}
-	
+\begin{titlepage}
+	\thispagestyle{empty}
+	\centering
+
+	% ---------- Judul utama ----------
+	{\LARGE \textbf{Tugas Kecil 2}\par}
+	\vspace{0.8cm}
+	{\large IF2211 Strategi Algoritma\par}
+	\vspace{0.2cm}
+	{\large \textit{Divide and Conquer} sebagai Strategi dalam Konversi Objek Tiga Dimensi menjadi Objek Kubus berbasis Struktur Data \textit{Octree}\par}
+	\vspace{0.2cm}
+	{\large Semester 2 Tahun 2025/2026\par}
+
+	% ---------- Gambar tengah ----------
+	\vspace{1.8cm}
+	\includegraphics[width=0.9\textwidth]{foto-kelompok}\par
+
+	% ---------- Disusun oleh ----------
+	\vspace{1.2cm}
+	{\bfseries Disusun oleh:\par}
+	\vspace{0.2cm}
+	\vspace{0.5cm}
+	\begin{tabular}{l l}
+		Muhammad Aufar Rizqi Kusuma & (13524061) \\
+		Athilla Zaidan Zidna Fann   & (13524068)
+	\end{tabular}
+
+	% ---------- Institusi ----------
+	\vspace{2.0cm}
+	Laboratorium Ilmu dan Rekayasa Komputasi\par
+	Program Studi Teknik Informatika\par
+	Sekolah Teknik Elektro dan Informatika\par
+	Institut Teknologi Bandung\par
+
+\end{titlepage}
+
+\clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+\clearpage
+
+\chapter{\textit{Problem Statement}}
+\input{sections/01-pendahuluan}
+
+\chapter{Algoritma Penyelesaian}
+\input{sections/02-dasar-teori}
+
+\chapter{Implementasi}
+\input{sections/03-implementasi}
+
+\chapter{Eksperimen}
+\input{sections/04-eksperimen}
+
+\chapter{Penutup}
+\input{sections/05-penutup}
+
+\chapter{Lampiran}
+\input{sections/06-lampiran}
+
+\bibliography{dafpus}
+\nocite{*}
+
 \end{document}
