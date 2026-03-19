@@ -1,0 +1,114 @@
+\section{Kisah}
+
+Objek tiga dimensi dalam dunia komputasi grafis umumnya direpresentasikan
+sebagai \textit{polygon mesh}, yaitu kumpulan segitiga yang membentuk permukaan
+suatu objek. Format ini efisien untuk \textit{rendering}, namun kurang praktis
+untuk keperluan seperti simulasi fisika, analisis volumetrik, dan manufaktur
+berbasis \textit{3D printing}. Salah satu solusi yang umum digunakan adalah
+mengonversi representasi \textit{mesh} tersebut menjadi representasi berbasis
+\textbf{voksel}, yaitu kubus-kubus kecil berukuran seragam yang menyusun
+permukaan objek. Konsep voksel bersifat analog dengan piksel pada gambar dua
+dimensi, namun beroperasi dalam ruang tiga dimensi.
+
+Pada Tugas Kecil 2 Strategi Algoritma ini, mahasiswa diminta untuk
+mengimplementasikan proses \textit{voxelization} permukaan objek tiga dimensi
+menggunakan struktur data \textit{Octree} dan paradigma \textit{Divide and Conquer}.
+Program yang dikembangkan diberi nama \textbf{OctoVox}: \textit{Konversi Model 3D
+Menjadi Voxel Menggunakan Octree Berbasis Divide and Conquer}.
+
+\section{Latar Belakang}
+
+\textit{Voxelization} adalah proses konversi objek tiga dimensi dari representasi
+\textit{polygon mesh} menjadi representasi berbasis voksel. Tantangan utama dalam
+proses ini adalah efisiensi komputasi, mengingat ruang tiga dimensi yang harus
+diperiksa sangat besar sehingga diperlukan strategi yang cerdas untuk menghindari
+pemeriksaan yang tidak perlu.
+
+Pendekatan yang digunakan dalam OctoVox adalah struktur data \textit{Octree},
+yaitu sebuah pohon hierarkis di mana setiap \textit{node} merepresentasikan
+sebuah kubus dalam ruang tiga dimensi dan dapat memiliki tepat delapan
+\textit{node} anak. Dengan struktur ini, ruang tiga dimensi dibagi secara rekursif
+hingga resolusi yang diinginkan. Node yang terbukti tidak bersinggungan dengan
+permukaan objek akan dipangkas (\textit{pruning}), sehingga pendekatan ini jauh
+lebih efisien dibandingkan pendekatan \textit{brute force} yang memeriksa setiap
+unit ruang satu per satu.
+
+Proses rekursi tersebut secara langsung mengimplementasikan paradigma
+\textit{Divide and Conquer}, di mana masalah besar berupa pemeriksaan seluruh
+ruang tiga dimensi dipecah menjadi delapan sub-masalah yang lebih kecil secara
+rekursif hingga mencapai resolusi voksel yang ditentukan pengguna.
+
+\section{Deskripsi Tugas}
+
+Program OctoVox menerima sebuah file model tiga dimensi berformat \texttt{.obj}
+beserta parameter kedalaman maksimum \textit{Octree}, kemudian menghasilkan file
+\texttt{.obj} baru yang merupakan representasi voksel dari permukaan objek masukan.
+Program dikembangkan dalam bahasa pemrograman Go dan dapat dijalankan pada sistem
+operasi Windows maupun Linux. Program ini dikerjakan secara berkelompok oleh dua
+orang mahasiswa.
+
+\subsection{Masukan}
+
+Program menerima dua buah parameter masukan melalui antarmuka CLI:
+
+\begin{enumerate}
+    \item \textbf{Path file \texttt{.obj}}: jalur menuju file model tiga dimensi
+    yang ingin dikonversi. Format \texttt{.obj} yang valid hanya memuat dua jenis
+    baris, yaitu:
+    \begin{itemize}
+        \item \texttt{v x y z}, yang mendefinisikan sebuah titik (\textit{vertex})
+        pada koordinat $(x, y, z)$ dalam ruang tiga dimensi.
+        \item \texttt{f i j k}, yang mendefinisikan sebuah segitiga (\textit{face})
+        dengan menghubungkan \textit{vertex} ke-$i$, ke-$j$, dan ke-$k$.
+    \end{itemize}
+    Berikut adalah contoh konten file \texttt{.obj} yang valid:
+    \begin{verbatim}
+v 2.229345 -0.992723 -0.862826
+v 2.292449 -0.871852 -0.882400
+v 2.410367 -0.777999 -0.841105
+f 1 2 3
+    \end{verbatim}
+    Program akan mendeteksi dan menolak file yang tidak memenuhi format tersebut
+    dengan menampilkan pesan kesalahan yang informatif kepada pengguna.
+
+    \item \textbf{Kedalaman maksimum Octree ($N$)}: bilangan bulat positif yang
+    menentukan resolusi voksel pada keluaran. Semakin besar nilai $N$, semakin
+    kecil ukuran voksel yang dihasilkan dan semakin tinggi tingkat detail objek
+    yang direpresentasikan. Ukuran sisi voksel memenuhi persamaan berikut:
+    \begin{equation}
+        s_{\text{voksel}} = \frac{s_{\text{bounding box}}}{2^N}
+    \end{equation}
+\end{enumerate}
+
+\subsection{Keluaran}
+
+Program menghasilkan dua bentuk keluaran secara bersamaan setelah proses
+\textit{voxelization} selesai dijalankan:
+
+\begin{enumerate}
+    \item \textbf{File \texttt{.obj} hasil konversi}: file model tiga dimensi
+    baru yang tersusun dari voksel-voksel berukuran seragam. Setiap voksel
+    direpresentasikan sebagai sebuah kubus dengan \textbf{8 \textit{vertex}} dan
+    \textbf{12 \textit{face}}, yaitu dua segitiga per sisi dikalikan enam sisi
+    kubus. Apabila terdapat $V$ voksel dalam hasil konversi, maka file keluaran
+    memuat $8V$ baris \textit{vertex} dan $12V$ baris \textit{face}.
+
+    \item \textbf{Laporan pada CLI}: informasi statistik yang ditampilkan segera
+    setelah proses selesai, memuat hal-hal berikut:
+    \begin{itemize}
+        \item Banyaknya voksel yang terbentuk.
+        \item Banyaknya \textit{vertex} dan \textit{face} pada file keluaran.
+        \item Statistik jumlah \textit{node} Octree yang terbentuk per kedalaman:
+        \begin{verbatim}
+1 : <banyaknya node dengan depth 1>
+2 : <banyaknya node dengan depth 2>
+...
+N : <banyaknya node dengan depth N>
+        \end{verbatim}
+        \item Statistik jumlah \textit{node} yang tidak perlu ditelusuri
+        (\textit{pruned}) per kedalaman, dengan format yang sama.
+        \item Kedalaman \textit{Octree} yang digunakan.
+        \item Lama waktu eksekusi program.
+        \item \textit{Path} penyimpanan file \texttt{.obj} keluaran.
+    \end{itemize}
+\end{enumerate}
