@@ -1,0 +1,148 @@
+Bagian ini membahas konsep-konsep teoritis yang menjadi landasan pengembangan
+program OctoVox. Pemahaman terhadap konsep-konsep berikut diperlukan untuk
+memahami cara kerja algoritma \textit{voxelization} berbasis \textit{Octree} yang
+diimplementasikan.
+
+\section{Format File \textit{.obj}}
+
+Format \textit{Wavefront OBJ} (.obj) adalah format file teks yang digunakan
+secara luas untuk merepresentasikan geometri objek tiga dimensi. Format ini
+bersifat sederhana dan dapat dibaca langsung oleh manusia karena tersimpan dalam
+bentuk teks biasa. Setiap baris dalam file \texttt{.obj} mendefinisikan satu
+elemen geometri dengan awalan tertentu.
+
+Dalam konteks program OctoVox, hanya dua jenis elemen yang diproses:
+
+\begin{itemize}
+    \item \textbf{Vertex} (\texttt{v}): mendefinisikan sebuah titik dalam ruang
+    tiga dimensi dengan koordinat $x$, $y$, dan $z$. Setiap \textit{vertex}
+    secara implisit memiliki nomor urut yang dimulai dari 1 sesuai urutan
+    kemunculannya dalam file.
+
+    \item \textbf{Face} (\texttt{f}): mendefinisikan sebuah poligon dengan
+    mereferensikan indeks \textit{vertex} yang membentuknya. Pada program ini,
+    setiap \textit{face} diasumsikan berbentuk segitiga sehingga hanya terdiri
+    dari tiga indeks \textit{vertex}.
+\end{itemize}
+
+Kumpulan \textit{face} yang saling terhubung membentuk apa yang disebut sebagai
+\textit{polygon mesh}, yaitu representasi permukaan suatu objek tiga dimensi
+sebagai jaring-jaring segitiga yang saling berbagi \textit{vertex} dan sisi.
+
+\section{Representasi Ruang Tiga Dimensi dan \textit{Bounding Box}}
+
+\subsection{Sistem Koordinat Kartesius Tiga Dimensi}
+
+Ruang tiga dimensi dalam komputasi grafis direpresentasikan menggunakan sistem
+koordinat Kartesius dengan tiga sumbu orthogonal, yaitu sumbu $x$, $y$, dan $z$.
+Setiap titik dalam ruang tiga dimensi didefinisikan oleh tiga buah bilangan riil
+yang masing-masing menyatakan posisi titik tersebut terhadap ketiga sumbu.
+
+\subsection{\textit{Axis-Aligned Bounding Box}}
+
+\textit{Axis-Aligned Bounding Box} (AABB) adalah kotak pembatas terkecil yang
+mengelilingi suatu objek atau sekumpulan titik dalam ruang tiga dimensi, di mana
+sisi-sisinya sejajar dengan sumbu-sumbu koordinat. AABB didefinisikan oleh dua
+buah titik, yaitu titik minimum $P_{\min} = (x_{\min}, y_{\min}, z_{\min})$ dan
+titik maksimum $P_{\max} = (x_{\max}, y_{\max}, z_{\max})$, yang masing-masing
+merepresentasikan pojok terdekat dan pojok terjauh dari pusat koordinat.
+
+Nilai $P_{\min}$ dan $P_{\max}$ diperoleh dengan mencari nilai minimum dan
+maksimum dari koordinat seluruh \textit{vertex} objek pada setiap sumbu:
+
+\begin{align}
+    x_{\min} &= \min_{i} x_i, \quad x_{\max} = \max_{i} x_i \\
+    y_{\min} &= \min_{i} y_i, \quad y_{\max} = \max_{i} y_i \\
+    z_{\min} &= \min_{i} z_i, \quad z_{\max} = \max_{i} z_i
+\end{align}
+
+Dalam konteks \textit{voxelization} berbasis \textit{Octree}, AABB objek
+dinormalisasi menjadi sebuah kubus sempurna dengan mengambil panjang sisi
+terpanjang sebagai ukuran sisi kubus, sehingga seluruh objek terkandung di dalam
+kubus tersebut.
+
+\section{Voksel dan \textit{Voxelization}}
+
+\subsection{Voksel}
+
+Voksel (\textit{voxel}), yang merupakan kependekan dari \textit{volumetric pixel},
+adalah unit terkecil dalam representasi tiga dimensi berbasis volume. Voksel
+merepresentasikan sebuah nilai pada suatu posisi reguler dalam ruang tiga dimensi,
+analog dengan piksel pada gambar dua dimensi. Dalam konteks program ini, voksel
+direpresentasikan sebagai kubus berukuran seragam yang menempati suatu posisi
+dalam ruang tiga dimensi.
+
+\subsection{\textit{Voxelization}}
+
+\textit{Voxelization} adalah proses konversi representasi geometri kontinu, seperti
+\textit{polygon mesh}, menjadi representasi diskrit berbasis voksel. Terdapat dua
+jenis \textit{voxelization} yang umum dikenal:
+
+\begin{itemize}
+    \item \textbf{\textit{Surface voxelization}}: hanya menghasilkan voksel pada
+    bagian yang bersinggungan dengan permukaan objek. Jenis inilah yang
+    diimplementasikan dalam OctoVox.
+
+    \item \textbf{\textit{Solid voxelization}}: menghasilkan voksel pada seluruh
+    ruang interior objek, tidak hanya pada permukaannya.
+\end{itemize}
+
+Resolusi hasil \textit{voxelization} ditentukan oleh ukuran voksel yang digunakan.
+Semakin kecil ukuran voksel, semakin tinggi resolusi dan semakin detail objek yang
+direpresentasikan, namun semakin besar pula kebutuhan memori dan komputasi.
+
+\section{\textit{Octree}}
+
+\textit{Octree} adalah struktur data pohon hierarkis yang digunakan untuk
+mempartisi ruang tiga dimensi secara rekursif. Setiap \textit{node} dalam
+\textit{Octree} merepresentasikan sebuah kubus dalam ruang tiga dimensi. Apabila
+suatu \textit{node} perlu diperhalus lebih lanjut, \textit{node} tersebut dibagi
+menjadi tepat delapan \textit{node} anak yang merepresentasikan delapan sub-kubus
+berukuran sama hasil pembagian kubus induknya. Pembagian ini dilakukan dengan
+membelah kubus tepat di tengah pada ketiga sumbu $x$, $y$, dan $z$ secara
+bersamaan.
+
+\subsection{Terminologi}
+
+Beberapa istilah penting dalam \textit{Octree} adalah sebagai berikut:
+
+\begin{itemize}
+    \item \textbf{\textit{Root node}}: \textit{node} paling atas dalam hierarki
+    \textit{Octree} yang merepresentasikan seluruh ruang yang diperhitungkan,
+    dalam konteks ini adalah AABB objek.
+
+    \item \textbf{\textit{Internal node}}: \textit{node} yang memiliki delapan
+    \textit{node} anak dan merepresentasikan suatu sub-ruang yang masih perlu
+    diperhalus.
+
+    \item \textbf{\textit{Leaf node}}: \textit{node} yang tidak memiliki anak,
+    baik karena telah mencapai kedalaman maksimum maupun karena sub-ruang yang
+    diwakilinya dinyatakan kosong.
+
+    \item \textbf{Kedalaman (\textit{depth})}: jarak suatu \textit{node} dari
+    \textit{root node}. \textit{Root node} berada pada kedalaman 0.
+
+    \item \textbf{Oktan}: salah satu dari delapan sub-kubus hasil pembagian suatu
+    \textit{node}.
+\end{itemize}
+
+\subsection{\textit{Pruning}}
+
+\textit{Pruning} adalah mekanisme pemangkasan cabang \textit{Octree} yang tidak
+perlu ditelusuri lebih lanjut. Dalam konteks \textit{voxelization}, sebuah
+\textit{node} dapat dipangkas apabila sub-ruang yang diwakilinya terbukti tidak
+bersinggungan dengan permukaan objek. Mekanisme ini secara signifikan mengurangi
+jumlah \textit{node} yang perlu diproses, sehingga meningkatkan efisiensi
+komputasi secara keseluruhan.
+
+Jumlah \textit{node} pada kedalaman $d$ tanpa \textit{pruning} adalah $8^d$,
+sehingga total \textit{node} pada kedalaman maksimum $N$ tanpa \textit{pruning}
+adalah:
+\begin{equation}
+    \sum_{d=0}^{N} 8^d = \frac{8^{N+1} - 1}{7}
+\end{equation}
+
+Dengan adanya \textit{pruning}, hanya \textit{node} yang bersinggungan dengan
+permukaan objek yang ditelusuri, sehingga jumlah \textit{node} yang diproses
+jauh lebih kecil dari nilai tersebut.
+
