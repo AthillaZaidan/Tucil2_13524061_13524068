@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	v, f, err := ParseOBJ("../test/line.obj")
+	v, f, err := ParseOBJ("../test/zero.obj")
 	if err != nil {
 		fmt.Println(err)
 		return
