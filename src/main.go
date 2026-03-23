@@ -61,7 +61,8 @@ func main() {
 
 	// 3. build octree + ukur waktu
 	start := time.Now()
-	octree.Build(root, verts, faces, 0, maxDepth)
+	pruned := map[int]int{}
+	octree.Build(root, verts, faces, 0, maxDepth, pruned)
 	elapsed := time.Since(start)
 
 	// 4. kumpulkan hasil
@@ -84,7 +85,10 @@ func main() {
 	for d := 0; d <= maxDepth; d++ {
 		fmt.Printf("  %d : %d\n", d, nodeCounts[d])
 	}
-
+	fmt.Println("\nStatistik Node yang tidak perlu ditelusuri:")
+	for i := 1; i <= maxDepth; i++ {
+		fmt.Printf("%d : %d\n", i, pruned[i])
+	}
 	// 6. tulis output
 	outputPath := "output.obj"
 	err = writeOBJ(leaves, outputPath)
