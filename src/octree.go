@@ -45,7 +45,7 @@ func MidPoint(a, b Vec3) Vec3 {
 	return mid
 }
 
-func makeOctant(min, max, mid Vec3, i int) *Octree {
+func MakeOctant(min, max, mid Vec3, i int) *Octree {
 	var oMin, oMax Vec3
 
 	// bit 0 → sumbu X
