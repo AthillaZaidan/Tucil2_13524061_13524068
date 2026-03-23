@@ -50,37 +50,32 @@ func MidPoint(a, b parser.Vec3) parser.Vec3 {
 	return mid
 }
 
+// pickHalf memilih separuh bawah atau atas dari satu sumbu.
+// Kalau useUpperHalf = true -> ambil [mid, hi], sebaliknya -> [lo, mid].
+func pickHalf(useUpperHalf bool, lo, mid, hi float64) (float64, float64) {
+	if useUpperHalf {
+		return mid, hi
+	}
+	return lo, mid
+}
+
+// MakeOctant membuat salah satu dari 8 octant anak.
+// Index i (0–7) dibaca sebagai 3 bit: bit0=X, bit1=Y, bit2=Z.
+// Bit 0 (bernilai 1) -> separuh kanan X, bit 1 (bernilai 2) -> separuh atas Y,
+// bit 2 (bernilai 4) -> separuh belakang Z.
 func MakeOctant(min, max, mid parser.Vec3, i int) *Octree {
-	var oMin, oMax parser.Vec3
+	xRight := i&1 != 0
+	yUp    := i&2 != 0
+	zBack  := i&4 != 0
 
-	// bit 0 → sumbu X
-	if i&1 != 0 {
-		oMin.X = mid.X
-		oMax.X = max.X
-	} else {
-		oMin.X = min.X
-		oMax.X = mid.X
+	xMin, xMax := pickHalf(xRight, min.X, mid.X, max.X)
+	yMin, yMax := pickHalf(yUp,    min.Y, mid.Y, max.Y)
+	zMin, zMax := pickHalf(zBack,  min.Z, mid.Z, max.Z)
+
+	return &Octree{
+		Min: parser.Vec3{X: xMin, Y: yMin, Z: zMin},
+		Max: parser.Vec3{X: xMax, Y: yMax, Z: zMax},
 	}
-
-	// bit 1 → sumbu Y
-	if i&2 != 0 {
-		oMin.Y = mid.Y
-		oMax.Y = max.Y
-	} else {
-		oMin.Y = min.Y
-		oMax.Y = mid.Y
-	}
-
-	// bit 2 → sumbu Z
-	if i&4 != 0 {
-		oMin.Z = mid.Z
-		oMax.Z = max.Z
-	} else {
-		oMin.Z = min.Z
-		oMax.Z = mid.Z
-	}
-
-	return &Octree{Min: oMin, Max: oMax}
 }
 
 func Build(node *Octree, verts []parser.Vec3, faces []parser.Face, depth, maxDepth int) {
