@@ -4,7 +4,7 @@ type Octree struct {
 	Min      Vec3
 	Max      Vec3
 	Children [8]*Octree
-	IsLeft   bool
+	IsLeaf   bool
 }
 
 func BoundingBox(verts []Vec3) (Vec3, Vec3) {
@@ -76,4 +76,19 @@ func MakeOctant(min, max, mid Vec3, i int) *Octree {
 	}
 
 	return &Octree{Min: oMin, Max: oMax}
+}
+
+func Build(node *Octree, verts []Vec3, faces []Face, depth, maxDepth int) {
+	if depth == maxDepth {
+		node.IsLeaf = true
+		return
+	}
+	mid := MidPoint(node.Min, node.Max)
+	for i := 0; i < 8; i++ {
+		child := MakeOctant(node.Min, node.Max, mid, i)
+		if TriBoxIntersect(child.Min, child.Max, verts, faces) {
+			node.Children[i] = child
+			Build(child, verts, faces, depth+1, maxDepth)
+		}
+	}
 }
