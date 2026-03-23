@@ -1,13 +1,18 @@
-package main
+package octree
+
+import (
+	parser "gemilang/src/packages/parser"
+	intersect "gemilang/src/packages/intersect"
+)
 
 type Octree struct {
-	Min      Vec3
-	Max      Vec3
+	Min      parser.Vec3
+	Max      parser.Vec3
 	Children [8]*Octree
 	IsLeaf   bool
 }
 
-func BoundingBox(verts []Vec3) (Vec3, Vec3) {
+func BoundingBox(verts []parser.Vec3) (parser.Vec3, parser.Vec3) {
 	min := verts[0]
 	max := verts[0]
 
@@ -36,8 +41,8 @@ func BoundingBox(verts []Vec3) (Vec3, Vec3) {
 	return min, max
 }
 
-func MidPoint(a, b Vec3) Vec3 {
-	var mid Vec3
+func MidPoint(a, b parser.Vec3) parser.Vec3 {
+	var mid parser.Vec3
 	mid.X = (a.X + b.X) / 2
 	mid.Y = (a.Y + b.Y) / 2
 	mid.Z = (a.Z + b.Z) / 2
@@ -45,8 +50,8 @@ func MidPoint(a, b Vec3) Vec3 {
 	return mid
 }
 
-func MakeOctant(min, max, mid Vec3, i int) *Octree {
-	var oMin, oMax Vec3
+func MakeOctant(min, max, mid parser.Vec3, i int) *Octree {
+	var oMin, oMax parser.Vec3
 
 	// bit 0 → sumbu X
 	if i&1 != 0 {
@@ -78,7 +83,7 @@ func MakeOctant(min, max, mid Vec3, i int) *Octree {
 	return &Octree{Min: oMin, Max: oMax}
 }
 
-func Build(node *Octree, verts []Vec3, faces []Face, depth, maxDepth int) {
+func Build(node *Octree, verts []parser.Vec3, faces []parser.Face, depth, maxDepth int) {
 	if depth == maxDepth {
 		node.IsLeaf = true
 		return
@@ -86,7 +91,7 @@ func Build(node *Octree, verts []Vec3, faces []Face, depth, maxDepth int) {
 	mid := MidPoint(node.Min, node.Max)
 	for i := 0; i < 8; i++ {
 		child := MakeOctant(node.Min, node.Max, mid, i)
-		if TriBoxIntersect(child.Min, child.Max, verts, faces) {
+		if intersect.TriBoxIntersect(child.Min, child.Max, verts, faces) {
 			node.Children[i] = child
 			Build(child, verts, faces, depth+1, maxDepth)
 		}

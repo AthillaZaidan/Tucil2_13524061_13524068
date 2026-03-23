@@ -5,10 +5,13 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	octree "gemilang/src/packages/octree"
+	parser "gemilang/src/packages/parser"
 )
 
 // hitung jumlah node per depth
-func CountNodes(node *Octree, depth int, counts map[int]int) {
+func CountNodes(node *octree.Octree, depth int, counts map[int]int) {
 	if node == nil {
 		return
 	}
@@ -19,7 +22,7 @@ func CountNodes(node *Octree, depth int, counts map[int]int) {
 }
 
 // kumpulkan semua leaf node (= voxel)
-func CollectLeaves(node *Octree, leaves *[]*Octree) {
+func CollectLeaves(node *octree.Octree, leaves *[]*octree.Octree) {
 	if node == nil {
 		return
 	}
@@ -46,23 +49,23 @@ func main() {
 	}
 
 	// 1. parse
-	verts, faces, err := ParseOBJ(path)
+	verts, faces, err := parser.ParseOBJ(path)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
 	// 2. bounding box + root
-	bbMin, bbMax := BoundingBox(verts)
-	root := &Octree{Min: bbMin, Max: bbMax}
+	bbMin, bbMax := octree.BoundingBox(verts)
+	root := &octree.Octree{Min: bbMin, Max: bbMax}
 
 	// 3. build octree + ukur waktu
 	start := time.Now()
-	Build(root, verts, faces, 0, maxDepth)
+	octree.Build(root, verts, faces, 0, maxDepth)
 	elapsed := time.Since(start)
 
 	// 4. kumpulkan hasil
-	var leaves []*Octree
+	var leaves []*octree.Octree
 	CollectLeaves(root, &leaves)
 	voxelCount := len(leaves)
 
@@ -92,7 +95,7 @@ func main() {
 	fmt.Printf("\nOutput disimpan di: %s\n", outputPath)
 }
 
-func writeOBJ(leaves []*Octree, outputPath string) error {
+func writeOBJ(leaves []*octree.Octree, outputPath string) error {
 	f, err := os.Create(outputPath)
 	if err != nil {
 		return fmt.Errorf("cannot create output: %w", err)
