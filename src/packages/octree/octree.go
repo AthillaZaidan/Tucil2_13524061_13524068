@@ -1,8 +1,9 @@
 package octree
 
 import (
-	parser "gemilang/src/packages/parser"
 	intersect "gemilang/src/packages/intersect"
+	parser "gemilang/src/packages/parser"
+	"sync"
 )
 
 type Octree struct {
@@ -84,13 +85,33 @@ func Build(node *Octree, verts []parser.Vec3, faces []parser.Face, depth, maxDep
 		return
 	}
 	mid := MidPoint(node.Min, node.Max)
+
+	// implmentasi concurrency
+	var wg sync.WaitGroup
+    var mu sync.Mutex
 	for i := 0; i < 8; i++ {
 		child := MakeOctant(node.Min, node.Max, mid, i)
 		if intersect.TriBoxIntersect(child.Min, child.Max, verts, faces) {
 			node.Children[i] = child
-			Build(child, verts, faces, depth+1, maxDepth, prunedCounts)
+			// Build(child, verts, faces, depth+1, maxDepth, prunedCounts)
+			wg.Add(1)
+			go func (idx int, c *Octree)  {
+				defer wg.Done()
+				localPruned := map[int]int{}
+
+				Build(c, verts, faces, depth+1, maxDepth, localPruned)
+
+				mu.Lock()
+				for x, y := range localPruned{
+					prunedCounts[x] += y;
+				}
+				mu.Unlock()
+			}(i, child)
 		} else {
+			mu.Lock();
 			prunedCounts[depth+1]++
+			mu.Unlock();
 		}
 	}
+	wg.Wait()
 }
