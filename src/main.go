@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	octree "gemilang/src/packages/octree"
@@ -36,13 +35,14 @@ func CollectLeaves(node *octree.Octree, leaves *[]*octree.Octree) {
 }
 
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Println("Usage: go run . <path-to-obj> <max-depth>")
-		os.Exit(1)
-	}
+	var filename string
+	fmt.Print("Masukkan nama file OBJ (contoh: pumpkin.obj): ")
+	fmt.Scan(&filename)
+	path := "obj/" + filename
 
-	path := os.Args[1]
-	maxDepth, err := strconv.Atoi(os.Args[2])
+	var maxDepth int
+	fmt.Print("Masukkan kedalaman maksimum: ")
+	_, err := fmt.Scan(&maxDepth)
 	if err != nil || maxDepth < 1 {
 		fmt.Println("Error: max-depth harus angka positif")
 		os.Exit(1)
