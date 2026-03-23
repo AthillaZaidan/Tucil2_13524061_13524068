@@ -5,11 +5,14 @@ import (
 )
 
 func main() {
-	v, f, err := ParseOBJ("../test/zero.obj")
+	verts, faces, err := ParseOBJ("../test/cow.obj")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error:", err)
 		return
 	}
 
-	fmt.Println(len(v), "verts,", len(f), "faces")
+	bbMin, bbMax := BoundingBox(verts)
+	fmt.Println("min:", bbMin)
+	fmt.Println("max:", bbMax)
+	fmt.Println(len(verts), "verts,", len(faces), "faces")
 }
