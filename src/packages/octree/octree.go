@@ -78,7 +78,7 @@ func MakeOctant(min, max, mid parser.Vec3, i int) *Octree {
 	}
 }
 
-func Build(node *Octree, verts []parser.Vec3, faces []parser.Face, depth, maxDepth int) {
+func Build(node *Octree, verts []parser.Vec3, faces []parser.Face, depth, maxDepth int, prunedCounts map[int]int) {
 	if depth == maxDepth {
 		node.IsLeaf = true
 		return
@@ -88,7 +88,9 @@ func Build(node *Octree, verts []parser.Vec3, faces []parser.Face, depth, maxDep
 		child := MakeOctant(node.Min, node.Max, mid, i)
 		if intersect.TriBoxIntersect(child.Min, child.Max, verts, faces) {
 			node.Children[i] = child
-			Build(child, verts, faces, depth+1, maxDepth)
+			Build(child, verts, faces, depth+1, maxDepth, prunedCounts)
+		} else {
+			prunedCounts[depth+1]++
 		}
 	}
 }
