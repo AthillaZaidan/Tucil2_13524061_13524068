@@ -1,4 +1,4 @@
-# OctoVox - Tucil 2 IF2211
+# OctoVox - Tucil 2 IF2211 Strategi Algoritma
 
 OctoVox adalah program untuk melakukan voxelization model 3D berformat OBJ menggunakan struktur data octree berbasis Divide and Conquer. Program ini menyediakan visualisasi interaktif, pengaturan max-depth, statistik hasil voxelization, serta ekspor hasil voxelization ke file OBJ baru.
 
