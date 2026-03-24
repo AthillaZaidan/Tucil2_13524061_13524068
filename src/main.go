@@ -7,6 +7,7 @@ import (
 
 	octree "gemilang/src/packages/octree"
 	parser "gemilang/src/packages/parser"
+	viewer "gemilang/src/packages/viewer"
 )
 
 // hitung jumlah node per depth
@@ -97,6 +98,13 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Printf("\nOutput disimpan di: %s\n", outputPath)
+
+	var showViewer string
+	fmt.Print("\nTampilkan 3D viewer? (y/n): ")
+	fmt.Scan(&showViewer)
+	if showViewer == "y" || showViewer == "Y" {
+		viewer.Launch(leaves, bbMin, bbMax)
+	}
 }
 
 func writeOBJ(leaves []*octree.Octree, outputPath string) error {
