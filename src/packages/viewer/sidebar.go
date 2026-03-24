@@ -33,12 +33,13 @@ var (
 
 // Sidebar holds references to labels that need to be updated after voxelization.
 type Sidebar struct {
-	statusLabel  *gui.Label
-	voxelLabel   *gui.Label
-	vertexLabel  *gui.Label
-	faceLabel    *gui.Label
-	timeLabel    *gui.Label
-	startBtn     *gui.Button
+	statusLabel     *gui.Label
+	voxelLabel      *gui.Label
+	vertexLabel     *gui.Label
+	faceLabel       *gui.Label
+	timeLabel       *gui.Label
+	startBtn        *gui.Button
+	prunedContainer *gui.Panel
 }
 
 // UpdateStats updates the sidebar statistics panel with voxelization results.
@@ -50,6 +51,26 @@ func (s *Sidebar) UpdateStats(result voxelResult) {
 	s.faceLabel.SetText(fmt.Sprintf("%d", result.voxelCount*12))
 	s.timeLabel.SetText(result.elapsed.Round(time.Millisecond).String())
 	s.startBtn.SetEnabled(true)
+
+	// Repopulate pruned nodes per depth
+	s.prunedContainer.DisposeChildren(true)
+	rowY := float32(0)
+	for d := 1; d <= result.maxDepth; d++ {
+		count := result.pruned[d]
+		keyLbl := gui.NewLabel(fmt.Sprintf("Depth %d :", d))
+		keyLbl.SetColor(&colMuted)
+		keyLbl.SetFontSize(12)
+		keyLbl.SetPosition(0, rowY)
+		s.prunedContainer.Add(keyLbl)
+
+		valLbl := gui.NewLabel(fmt.Sprintf("%d", count))
+		valLbl.SetColor(&colText)
+		valLbl.SetFontSize(12)
+		valLbl.SetPosition(90, rowY)
+		s.prunedContainer.Add(valLbl)
+		rowY += 22
+	}
+	s.prunedContainer.SetHeight(rowY)
 }
 
 // SetProcessing updates the sidebar to the "processing" state.
@@ -101,7 +122,7 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	var dd *gui.DropDown
 	if len(objFiles) > 0 {
 		dd = gui.NewDropDown(fieldW, gui.NewImageLabel(objFiles[0]))
-		for _, f := range objFiles[1:] {
+		for _, f := range objFiles { // semua file masuk ke list, termasuk yang pertama
 			dd.Add(gui.NewImageLabel(f))
 		}
 	} else {
@@ -186,6 +207,19 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	sb.faceLabel = statRow(panel, "Faces", "—", padX, y)
 	y += 22
 	sb.timeLabel = statRow(panel, "Time", "—", padX, y)
+	y += 30
+
+	// ── Pruned Nodes ────────────────────────────
+	divider(panel, padX, y)
+	y += 14
+
+	sectionLabel(panel, "PRUNED NODES PER DEPTH", padX, y)
+	y += 24
+
+	prunedContainer := gui.NewPanel(fieldW, 0)
+	prunedContainer.SetPosition(padX, y)
+	sb.prunedContainer = prunedContainer
+	panel.Add(prunedContainer)
 
 	scene.Add(panel)
 	return sb

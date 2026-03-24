@@ -25,6 +25,8 @@ type voxelResult struct {
 	bbMax      parser.Vec3
 	elapsed    time.Duration
 	voxelCount int
+	pruned     map[int]int
+	maxDepth   int
 }
 
 // Launch opens the OctoVox GUI: left sidebar for input/stats, right area for 3D view.
@@ -103,6 +105,8 @@ func Launch() {
 				bbMax:      bbMax,
 				elapsed:    elapsed,
 				voxelCount: len(leaves),
+				pruned:     pruned,
+				maxDepth:   depth,
 			}
 		}()
 	})
