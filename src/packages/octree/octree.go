@@ -13,33 +13,59 @@ type Octree struct {
 	IsLeaf   bool
 }
 
-func BoundingBox(verts []parser.Vec3) (parser.Vec3, parser.Vec3) {
-	min := verts[0]
-	max := verts[0]
-
-	for _, v := range verts {
-		if v.X < min.X {
-			min.X = v.X
-		}
-		if v.Y < min.Y {
-			min.Y = v.Y
-		}
-		if v.Z < min.Z {
-			min.Z = v.Z
-		}
-
-		if v.X > max.X {
-			max.X = v.X
-		}
-		if v.Y > max.Y {
-			max.Y = v.Y
-		}
-		if v.Z > max.Z {
-			max.Z = v.Z
-		}
-
+func mergeBounds(minA, maxA, minB, maxB parser.Vec3) (parser.Vec3, parser.Vec3) {
+	min := parser.Vec3{
+		X: minA.X,
+		Y: minA.Y,
+		Z: minA.Z,
 	}
+	max := parser.Vec3{
+		X: maxA.X,
+		Y: maxA.Y,
+		Z: maxA.Z,
+	}
+
+	if minB.X < min.X {
+		min.X = minB.X
+	}
+	if minB.Y < min.Y {
+		min.Y = minB.Y
+	}
+	if minB.Z < min.Z {
+		min.Z = minB.Z
+	}
+
+	if maxB.X > max.X {
+		max.X = maxB.X
+	}
+	if maxB.Y > max.Y {
+		max.Y = maxB.Y
+	}
+	if maxB.Z > max.Z {
+		max.Z = maxB.Z
+	}
+
 	return min, max
+}
+
+func boundingBoxDivideConquer(verts []parser.Vec3, left, right int) (parser.Vec3, parser.Vec3) {
+	if left == right {
+		return verts[left], verts[left]
+	}
+
+	mid := left + (right-left)/2
+	leftMin, leftMax := boundingBoxDivideConquer(verts, left, mid)
+	rightMin, rightMax := boundingBoxDivideConquer(verts, mid+1, right)
+
+	return mergeBounds(leftMin, leftMax, rightMin, rightMax)
+}
+
+func BoundingBox(verts []parser.Vec3) (parser.Vec3, parser.Vec3) {
+	if len(verts) == 0 {
+		return parser.Vec3{}, parser.Vec3{}
+	}
+
+	return boundingBoxDivideConquer(verts, 0, len(verts)-1)
 }
 
 func MidPoint(a, b parser.Vec3) parser.Vec3 {
@@ -66,12 +92,12 @@ func pickHalf(useUpperHalf bool, lo, mid, hi float64) (float64, float64) {
 // bit 2 (bernilai 4) -> separuh belakang Z.
 func MakeOctant(min, max, mid parser.Vec3, i int) *Octree {
 	xRight := i&1 != 0
-	yUp    := i&2 != 0
-	zBack  := i&4 != 0
+	yUp := i&2 != 0
+	zBack := i&4 != 0
 
 	xMin, xMax := pickHalf(xRight, min.X, mid.X, max.X)
-	yMin, yMax := pickHalf(yUp,    min.Y, mid.Y, max.Y)
-	zMin, zMax := pickHalf(zBack,  min.Z, mid.Z, max.Z)
+	yMin, yMax := pickHalf(yUp, min.Y, mid.Y, max.Y)
+	zMin, zMax := pickHalf(zBack, min.Z, mid.Z, max.Z)
 
 	return &Octree{
 		Min: parser.Vec3{X: xMin, Y: yMin, Z: zMin},
@@ -88,29 +114,29 @@ func Build(node *Octree, verts []parser.Vec3, faces []parser.Face, depth, maxDep
 
 	// implmentasi concurrency
 	var wg sync.WaitGroup
-    var mu sync.Mutex
+	var mu sync.Mutex
 	for i := 0; i < 8; i++ {
 		child := MakeOctant(node.Min, node.Max, mid, i)
 		if intersect.TriBoxIntersect(child.Min, child.Max, verts, faces) {
 			node.Children[i] = child
 			// Build(child, verts, faces, depth+1, maxDepth, prunedCounts)
 			wg.Add(1)
-			go func (idx int, c *Octree)  {
+			go func(idx int, c *Octree) {
 				defer wg.Done()
 				localPruned := map[int]int{}
 
 				Build(c, verts, faces, depth+1, maxDepth, localPruned)
 
 				mu.Lock()
-				for x, y := range localPruned{
-					prunedCounts[x] += y;
+				for x, y := range localPruned {
+					prunedCounts[x] += y
 				}
 				mu.Unlock()
 			}(i, child)
 		} else {
-			mu.Lock();
+			mu.Lock()
 			prunedCounts[depth+1]++
-			mu.Unlock();
+			mu.Unlock()
 		}
 	}
 	wg.Wait()
