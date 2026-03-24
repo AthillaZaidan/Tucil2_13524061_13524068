@@ -41,3 +41,13 @@ Thumbs.db
 *.lock
 
 Tucil2-IF2211-2026.pdf
+
+# Go/Windows build artifacts
+bin/OctoVox
+bin/*.exe
+bin/*.dll
+
+# Generated voxelization outputs
+output.obj
+obj/*_voxelized.obj
+obj/aufaraja.obj

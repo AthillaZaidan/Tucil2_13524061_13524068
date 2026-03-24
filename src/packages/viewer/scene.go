@@ -27,6 +27,8 @@ type voxelResult struct {
 	voxelCount int
 	pruned     map[int]int
 	maxDepth   int
+	outputPath string
+	errMsg     string
 }
 
 func Launch() {
@@ -51,7 +53,6 @@ func Launch() {
 	orbitCtrl := camera.NewOrbitControl(cam)
 	orbitCtrl.SetEnabled(camera.OrbitNone)
 
-
 	ambLight := light.NewAmbient(&math32.Color{R: 1, G: 1, B: 1}, 0.55)
 	scene.Add(ambLight)
 	dirLight := light.NewDirectional(&math32.Color{R: 1, G: 0.95, B: 0.90}, 1.0)
@@ -72,7 +73,7 @@ func Launch() {
 	var voxelRoot *core.Node
 	processing := false
 
-	sidebar := CreateSidebar(scene, wh, func(filename string, depth int) {
+	sidebar := CreateSidebar(scene, wh, func(filename string, depth int, outputName string) {
 		if processing {
 			return
 		}
@@ -82,8 +83,7 @@ func Launch() {
 			path := "obj/" + filename
 			verts, faces, err := parser.ParseOBJ(path)
 			if err != nil {
-				fmt.Println("Error parsing OBJ:", err)
-				processing = false
+				resultChan <- voxelResult{errMsg: fmt.Sprintf("Error parsing OBJ: %v", err)}
 				return
 			}
 			bbMin, bbMax := octreeLib.BoundingBox(verts)
@@ -96,6 +96,12 @@ func Launch() {
 			var leaves []*octreeLib.Octree
 			octreeLib.CollectLeaves(root, &leaves)
 
+			outputPath := "obj/" + outputName
+			if saveErr := SaveVoxelOBJ(outputPath, leaves); saveErr != nil {
+				resultChan <- voxelResult{errMsg: fmt.Sprintf("Error saving voxel OBJ: %v", saveErr)}
+				return
+			}
+
 			resultChan <- voxelResult{
 				leaves:     leaves,
 				bbMin:      bbMin,
@@ -104,6 +110,7 @@ func Launch() {
 				voxelCount: len(leaves),
 				pruned:     pruned,
 				maxDepth:   depth,
+				outputPath: outputPath,
 			}
 		}()
 	})
@@ -120,6 +127,10 @@ func Launch() {
 		select {
 		case result := <-resultChan:
 			processing = false
+			if result.errMsg != "" {
+				sidebar.SetError(result.errMsg)
+				break
+			}
 
 			// Remove previous voxels and hint
 			if voxelRoot != nil {
@@ -137,6 +148,7 @@ func Launch() {
 			orbitCtrl.SetEnabled(camera.OrbitAll)
 			AddVoxels(voxelRoot, result.leaves, result.bbMin, result.bbMax)
 			sidebar.UpdateStats(result)
+			fmt.Printf("Voxelized OBJ saved to %s\n", result.outputPath)
 		default:
 		}
 

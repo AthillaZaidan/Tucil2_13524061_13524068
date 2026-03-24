@@ -3,6 +3,7 @@ package viewer
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -13,9 +14,9 @@ import (
 )
 
 const (
-	sidebarW   = float32(280)
-	padX       = float32(20)
-	fieldW     = sidebarW - padX*2
+	sidebarW = float32(280)
+	padX     = float32(20)
+	fieldW   = sidebarW - padX*2
 )
 
 // colors
@@ -77,7 +78,13 @@ func (s *Sidebar) SetProcessing() {
 	s.startBtn.SetEnabled(false)
 }
 
-func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, depth int)) *Sidebar {
+func (s *Sidebar) SetError(msg string) {
+	s.statusLabel.SetText("● " + msg)
+	s.statusLabel.SetColor(&colOrange)
+	s.startBtn.SetEnabled(true)
+}
+
+func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, depth int, outputName string)) *Sidebar {
 	sb := &Sidebar{}
 
 	panel := gui.NewPanel(sidebarW, float32(wh))
@@ -116,7 +123,7 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	var dd *gui.DropDown
 	if len(objFiles) > 0 {
 		dd = gui.NewDropDown(fieldW, gui.NewImageLabel(objFiles[0]))
-		for _, f := range objFiles { 
+		for _, f := range objFiles {
 			dd.Add(gui.NewImageLabel(f))
 		}
 	} else {
@@ -161,8 +168,12 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 		if err != nil || depth < 1 {
 			depth = 4
 		}
-		sb.SetProcessing()
-		onSubmit(filename, depth)
+
+		defaultOut := strings.TrimSuffix(filename, filepath.Ext(filename)) + "_voxelized.obj"
+		showOutputPrompt(scene, wh, defaultOut, func(outputName string) {
+			sb.SetProcessing()
+			onSubmit(filename, depth, outputName)
+		})
 	})
 	panel.Add(startBtn)
 	y += 46
@@ -183,7 +194,6 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	sb.statusLabel.SetPosition(padX, y)
 	panel.Add(sb.statusLabel)
 	y += 30
-
 
 	divider(panel, padX, y)
 	y += 14
@@ -215,6 +225,57 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	return sb
 }
 
+func showOutputPrompt(scene *core.Node, wh int, defaultName string, onConfirm func(outputName string)) {
+	overlayW := float32(390)
+	overlayH := float32(170)
+	overlay := gui.NewPanel(overlayW, overlayH)
+	overlay.SetColor4(&math32.Color4{R: 0.05, G: 0.08, B: 0.13, A: 0.98})
+	overlay.SetBordersFrom(&gui.RectBounds{Top: 1, Right: 1, Bottom: 1, Left: 1})
+	overlay.SetBordersColor4(&colBorder)
+	overlay.SetPosition(sidebarW+20, float32(wh)*0.5-overlayH*0.5)
+
+	title := gui.NewLabel("Output file name")
+	title.SetColor(&colCyan)
+	title.SetFontSize(14)
+	title.SetPosition(16, 14)
+	overlay.Add(title)
+
+	nameEdit := gui.NewEdit(int(overlayW-32), defaultName)
+	nameEdit.SetPosition(16, 48)
+	overlay.Add(nameEdit)
+
+	hint := gui.NewLabel("Saved to obj/<name>.obj")
+	hint.SetColor(&colMuted)
+	hint.SetFontSize(10)
+	hint.SetPosition(16, 80)
+	overlay.Add(hint)
+
+	cancelBtn := gui.NewButton("Cancel")
+	cancelBtn.SetPosition(16, 108)
+	cancelBtn.SetWidth(90)
+	cancelBtn.Subscribe(gui.OnClick, func(evname string, ev interface{}) {
+		scene.Remove(overlay)
+	})
+	overlay.Add(cancelBtn)
+
+	confirmBtn := gui.NewButton("Save + Voxelize")
+	confirmBtn.SetPosition(120, 108)
+	confirmBtn.SetWidth(150)
+	confirmBtn.Subscribe(gui.OnClick, func(evname string, ev interface{}) {
+		name := filepath.Base(strings.TrimSpace(nameEdit.Text()))
+		if name == "" {
+			return
+		}
+		if filepath.Ext(strings.ToLower(name)) != ".obj" {
+			name += ".obj"
+		}
+		scene.Remove(overlay)
+		onConfirm(name)
+	})
+	overlay.Add(confirmBtn)
+
+	scene.Add(overlay)
+}
 
 func sectionLabel(parent *gui.Panel, text string, x, y float32) {
 	lbl := gui.NewLabel(text)
@@ -224,14 +285,12 @@ func sectionLabel(parent *gui.Panel, text string, x, y float32) {
 	parent.Add(lbl)
 }
 
-
 func divider(parent *gui.Panel, x, y float32) {
 	d := gui.NewPanel(fieldW, 1)
 	d.SetColor4(&colBorder)
 	d.SetPosition(x, y)
 	parent.Add(d)
 }
-
 
 func statRow(parent *gui.Panel, key, value string, x, y float32) *gui.Label {
 	keyLbl := gui.NewLabel(key + " :")
@@ -248,7 +307,6 @@ func statRow(parent *gui.Panel, key, value string, x, y float32) *gui.Label {
 
 	return valLbl
 }
-
 
 func scanObjFiles(dir string) []string {
 	entries, err := os.ReadDir(dir)
