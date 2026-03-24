@@ -79,6 +79,20 @@ func MakeOctant(min, max, mid parser.Vec3, i int) *Octree {
 	}
 }
 
+// CollectLeaves recursively collects all leaf nodes from the octree.
+func CollectLeaves(node *Octree, leaves *[]*Octree) {
+	if node == nil {
+		return
+	}
+	if node.IsLeaf {
+		*leaves = append(*leaves, node)
+		return
+	}
+	for _, child := range node.Children {
+		CollectLeaves(child, leaves)
+	}
+}
+
 func Build(node *Octree, verts []parser.Vec3, faces []parser.Face, depth, maxDepth int, prunedCounts map[int]int) {
 	if depth == maxDepth {
 		node.IsLeaf = true
