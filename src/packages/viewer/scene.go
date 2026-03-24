@@ -29,7 +29,6 @@ type voxelResult struct {
 	maxDepth   int
 }
 
-// Launch opens the OctoVox GUI: left sidebar for input/stats, right area for 3D view.
 func Launch() {
 	a := app.App()
 	glfwWin := a.IWindow.(*window.GlfwWindow)
@@ -43,7 +42,6 @@ func Launch() {
 	scene := core.NewNode()
 	gui.Manager().Set(scene)
 
-	// Camera: aspect accounts for the visible 3D area (right of sidebar)
 	viewW := float32(ww) - sidebarW
 	cam := camera.New(viewW / float32(wh))
 	cam.SetProjection(camera.Perspective)
@@ -53,14 +51,13 @@ func Launch() {
 	orbitCtrl := camera.NewOrbitControl(cam)
 	orbitCtrl.SetEnabled(camera.OrbitNone)
 
-	// Lighting
+
 	ambLight := light.NewAmbient(&math32.Color{R: 1, G: 1, B: 1}, 0.55)
 	scene.Add(ambLight)
 	dirLight := light.NewDirectional(&math32.Color{R: 1, G: 0.95, B: 0.90}, 1.0)
 	dirLight.SetPosition(2, 3, 2)
 	scene.Add(dirLight)
 
-	// Handle window resize
 	a.IWindow.Subscribe(window.OnWindowSize, func(evname string, ev interface{}) {
 		newW, newH := a.IWindow.GetSize()
 		newViewW := float32(newW) - sidebarW
@@ -111,7 +108,6 @@ func Launch() {
 		}()
 	})
 
-	// Hint label shown in the 3D area before first voxelization
 	hintLabel := gui.NewLabel("Select a file and press VOXELIZE")
 	hintLabel.SetColor(&math32.Color{R: 0.25, G: 0.35, B: 0.55})
 	hintLabel.SetFontSize(14)
@@ -120,7 +116,6 @@ func Launch() {
 
 	hintShown := true
 
-	// Render loop
 	a.Run(func(rend *renderer.Renderer, deltaTime time.Duration) {
 		select {
 		case result := <-resultChan:
@@ -150,7 +145,6 @@ func Launch() {
 	})
 }
 
-// positionCamera moves the camera to fully see the bounding box.
 func positionCamera(cam *camera.Camera, bbMin, bbMax parser.Vec3) {
 	cx := float32((bbMin.X + bbMax.X) / 2)
 	cy := float32((bbMin.Y + bbMax.Y) / 2)

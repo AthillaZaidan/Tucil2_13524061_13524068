@@ -31,7 +31,6 @@ var (
 	colOrange   = math32.Color{R: 1.00, G: 0.60, B: 0.10}
 )
 
-// Sidebar holds references to labels that need to be updated after voxelization.
 type Sidebar struct {
 	statusLabel     *gui.Label
 	voxelLabel      *gui.Label
@@ -42,7 +41,6 @@ type Sidebar struct {
 	prunedContainer *gui.Panel
 }
 
-// UpdateStats updates the sidebar statistics panel with voxelization results.
 func (s *Sidebar) UpdateStats(result voxelResult) {
 	s.statusLabel.SetText("● Done")
 	s.statusLabel.SetColor(&colGreen)
@@ -73,14 +71,12 @@ func (s *Sidebar) UpdateStats(result voxelResult) {
 	s.prunedContainer.SetHeight(rowY)
 }
 
-// SetProcessing updates the sidebar to the "processing" state.
 func (s *Sidebar) SetProcessing() {
 	s.statusLabel.SetText("● Processing...")
 	s.statusLabel.SetColor(&colOrange)
 	s.startBtn.SetEnabled(false)
 }
 
-// CreateSidebar builds the left panel and returns a *Sidebar for later updates.
 func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, depth int)) *Sidebar {
 	sb := &Sidebar{}
 
@@ -92,7 +88,6 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 
 	y := float32(0)
 
-	// ── Header ──────────────────────────────────
 	header := gui.NewPanel(sidebarW, 70)
 	header.SetColor4(&colHeaderBg)
 	header.SetBordersFrom(&gui.RectBounds{Bottom: 1})
@@ -114,7 +109,6 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	panel.Add(header)
 	y += 82
 
-	// ── Input File ──────────────────────────────
 	sectionLabel(panel, "INPUT FILE", padX, y)
 	y += 22
 
@@ -122,7 +116,7 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	var dd *gui.DropDown
 	if len(objFiles) > 0 {
 		dd = gui.NewDropDown(fieldW, gui.NewImageLabel(objFiles[0]))
-		for _, f := range objFiles { // semua file masuk ke list, termasuk yang pertama
+		for _, f := range objFiles { 
 			dd.Add(gui.NewImageLabel(f))
 		}
 	} else {
@@ -132,7 +126,6 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	panel.Add(dd)
 	y += 42
 
-	// ── Max Depth ───────────────────────────────
 	sectionLabel(panel, "MAX DEPTH", padX, y)
 	y += 22
 
@@ -141,9 +134,8 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	panel.Add(depthEdit)
 	y += 42
 
-	// ── Start Button ────────────────────────────
 	y += 4
-	startBtn := gui.NewButton("  ▶  VOXELIZE  ")
+	startBtn := gui.NewButton("  VOXELIZE  ")
 	startBtn.SetColor4(&math32.Color4{R: 0.00, G: 0.50, B: 0.72, A: 1.0})
 	startBtn.Label.SetColor(&math32.Color{R: 0.92, G: 0.97, B: 1.0})
 	startBtn.Label.SetFontSize(13)
@@ -175,7 +167,6 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	panel.Add(startBtn)
 	y += 46
 
-	// ── Status ──────────────────────────────────
 	divider(panel, padX, y)
 	y += 14
 
@@ -193,7 +184,7 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	panel.Add(sb.statusLabel)
 	y += 30
 
-	// ── Statistics ──────────────────────────────
+
 	divider(panel, padX, y)
 	y += 14
 
@@ -209,7 +200,6 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	sb.timeLabel = statRow(panel, "Time", "—", padX, y)
 	y += 30
 
-	// ── Pruned Nodes ────────────────────────────
 	divider(panel, padX, y)
 	y += 14
 
@@ -225,7 +215,7 @@ func CreateSidebar(scene *core.Node, wh int, onSubmit func(filename string, dept
 	return sb
 }
 
-// sectionLabel adds a small all-caps section header label.
+
 func sectionLabel(parent *gui.Panel, text string, x, y float32) {
 	lbl := gui.NewLabel(text)
 	lbl.SetColor(&colCyanDim)
@@ -234,7 +224,7 @@ func sectionLabel(parent *gui.Panel, text string, x, y float32) {
 	parent.Add(lbl)
 }
 
-// divider adds a 1px horizontal line.
+
 func divider(parent *gui.Panel, x, y float32) {
 	d := gui.NewPanel(fieldW, 1)
 	d.SetColor4(&colBorder)
@@ -242,7 +232,7 @@ func divider(parent *gui.Panel, x, y float32) {
 	parent.Add(d)
 }
 
-// statRow adds a "Key: Value" row and returns the value label for later updates.
+
 func statRow(parent *gui.Panel, key, value string, x, y float32) *gui.Label {
 	keyLbl := gui.NewLabel(key + " :")
 	keyLbl.SetColor(&colMuted)
@@ -259,7 +249,7 @@ func statRow(parent *gui.Panel, key, value string, x, y float32) *gui.Label {
 	return valLbl
 }
 
-// scanObjFiles returns .obj filenames from the given directory.
+
 func scanObjFiles(dir string) []string {
 	entries, err := os.ReadDir(dir)
 	if err != nil {

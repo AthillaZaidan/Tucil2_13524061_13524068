@@ -11,8 +11,6 @@ import (
 	parser "gemilang/src/packages/parser"
 )
 
-// AddVoxels converts octree leaf nodes into 3D meshes and adds them to the scene.
-// Each voxel is colored by its normalized position: R=X, G=Y, B=Z.
 func AddVoxels(scene *core.Node, leaves []*octree.Octree, bbMin, bbMax parser.Vec3) {
 	rangeX := bbMax.X - bbMin.X
 	rangeY := bbMax.Y - bbMin.Y
