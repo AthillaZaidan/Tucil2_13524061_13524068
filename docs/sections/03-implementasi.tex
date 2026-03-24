@@ -1,0 +1,193 @@
+\section{Pendekatan Umum}
+Implementasi OctoVox menggunakan strategi divide and conquer untuk mengubah mesh segitiga dari berkas OBJ menjadi representasi voxel berbasis octree. Pendekatan ini dimulai dari pembacaan geometri model melalui parser, dilanjutkan dengan penentuan batas ruang global objek menggunakan \textit{axis-aligned bounding box} (AABB), kemudian ruang tersebut dibagi rekursif menjadi delapan subruang pada setiap level. Setiap subruang hanya dipertahankan apabila benar-benar beririsan dengan segitiga pada mesh. Dengan mekanisme ini, ruang kosong dapat dipangkas sejak awal, sehingga proses voxelisasi tetap fokus pada bagian volume yang relevan terhadap objek.
+
+Alur kerja program bergerak dari tahap input, parsing, pembentukan octree, hingga ekspor voxel ke OBJ keluaran. Meskipun implementasi menggunakan struktur data pohon, prinsip utamanya tetap pemecahan masalah besar menjadi submasalah kecil yang independen, lalu menggabungkan hasil yang valid pada kedalaman target. Pendekatan ini konsisten dengan tujuan efisiensi karena jumlah node yang diperiksa berkurang signifikan akibat proses pruning berbasis uji irisan geometri.
+
+\section{Solusi Teknis}
+Pemrosesan dimulai di fungsi \texttt{main} yang membaca \texttt{filename} dan \texttt{maxDepth}, kemudian memanggil \texttt{parser.ParseOBJ(path)} untuk menghasilkan dua struktur utama, yaitu \texttt{verts []Vec3} dan \texttt{faces []Face}. Variabel \texttt{verts} menyimpan seluruh titik 3D, sedangkan \texttt{faces} menyimpan indeks tripel ke vertex yang membentuk segitiga. Setelah parsing berhasil, fungsi \texttt{octree.BoundingBox(verts)} menghasilkan \texttt{bbMin} dan \texttt{bbMax} sebagai batas root node yang menjadi domain awal pembelahan ruang.
+
+Pada berkas octree, fungsi \texttt{boundingBoxDivideConquer(verts, left, right)} menjalankan pembelahan rentang vertex secara rekursif. Basis rekursi terjadi saat \texttt{left == right}, sehingga satu vertex langsung menjadi nilai minimum dan maksimum lokal. Hasil dua subrentang digabung melalui \texttt{mergeBounds(leftMin, leftMax, rightMin, rightMax)} dengan operasi minimum dan maksimum per komponen sumbu \texttt{X}, \texttt{Y}, dan \texttt{Z}. Ketika root terbentuk, fungsi \texttt{Build(node, verts, faces, depth, maxDepth, prunedCounts)} membangkitkan delapan child melalui \texttt{MakeOc\\tant}, lalu memfilter masing-masing child menggunakan \texttt{intersect.TriBoxInterse\\ct(child.Min, child.Max, verts, faces)}. Jika tidak beririsan, child dipangkas dan pencacahan \texttt{prunedCounts[depth+1]} dinaikkan. Jika beririsan, rekursi berlanjut hingga \texttt{depth == maxDepth}, dan node ditandai sebagai leaf voxel melalui \texttt{node.IsLeaf = true}.
+
+Pengujian irisan di \texttt{intersect.go} mengimplementasikan SAT dengan memproyeksikan segitiga dan box pada sekumpulan sumbu kandidat. Variabel seperti \texttt{center}, \texttt{half}, \texttt{e0/e1/e2}, dan \texttt{axes} digunakan untuk mentransformasikan secara geometri ke koordinat lokal box serta membentuk sumbu pemisah dari hasil cross product. Fungsi \texttt{overlaps} menjadi keputusan akhir pada setiap sumbu. Ketika ada satu sumbu yang tidak overlap, fungsi segera mengembalikan \texttt{false}.
+
+Berikut adalah pseudocode untuk pipeline utama.
+
+\begin{algorithm}[H]
+    \caption{Pipeline Voxelisasi Berbasis Octree}
+    \begin{algorithmic}[1]
+        \Require \textit{objPath}, \textit{maxDepth}
+        \Ensure Daftar voxel leaf dan statistik pruning
+        \State $(verts, faces) \gets ParseOBJ(objPath)$
+        \State $(bbMin, bbMax) \gets BoundingBox(verts)$
+        \State $root \gets$ Octree node dengan batas $bbMin$ sampai $bbMax$
+        \State $prunedCounts \gets$ map kosong
+        \State \Call{Build}{$root, verts, faces, 0, maxDepth, prunedCounts$}
+        \State $leaves \gets$ \Call{CollectLeaves}{$root$}
+        \State \Call{WriteOBJ}{$leaves, \text{"output.obj"}$}
+        \State \Return $(leaves, prunedCounts)$
+    \end{algorithmic}
+\end{algorithm}
+
+Kemudian, Pseudocode berikut memperlihatkan detail prosedur rekursif pembentukan octree yang terkait langsung dengan menggunakan fungsi \texttt{Build}.
+
+\begin{algorithm}[H]
+    \caption{Build Node Octree Dengan Pruning Irisan}
+    \begin{algorithmic}[1]
+        \Require \textit{node}, \textit{verts}, \textit{faces}, \textit{depth}, \textit{maxDepth}, \textit{prunedCounts}
+        \If{$depth = maxDepth$}
+        \State $node.IsLeaf \gets \text{true}$
+        \State \Return
+        \EndIf
+        \State $mid \gets$ \Call{MidPoint}{$node.Min, node.Max$}
+        \For{$i \gets 0$ to $7$}
+        \State $child \gets$ \Call{MakeOctant}{$node.Min, node.Max, mid, i$}
+        \If{\Call{TriBoxIntersect}{$child.Min, child.Max, verts, faces$}}
+        \State $node.Children[i] \gets child$
+        \State \Call{Build}{$child, verts, faces, depth+1, maxDepth, prunedCounts$}
+        \Else
+        \State $prunedCounts[depth+1] \gets prunedCounts[depth+1] + 1$
+        \EndIf
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
+\section{Arsitektur Program}
+Arsitektur program menerapkan pendekatan berlapis sederhana yang dapat dibaca sebagai tiga lapisan fungsional. Lapisan pertama adalah lapisan antarmuka eksekusi di \texttt{main.go} yang menangani interaksi pengguna, validasi input awal, serta koordinasi alur proses. Lapisan kedua adalah lapisan layanan geometri, yang diisi oleh \texttt{parser} untuk transformasi data OBJ ke struktur internal, \texttt{octree} untuk manajemen ruang hirarkis dan rekursi, serta \texttt{intersect} untuk logika matematika irisan segitiga-kotak. Lapisan ketiga adalah lapisan keluaran yang menuliskan representasi voxel sebagai berkas OBJ agar dapat divisualisasikan oleh perangkat lunak 3D eksternal.
+
+Pemisahan ini menjaga kohesi setiap berkas tetap tinggi dan menurunkan keterikatan antarmodul. Sebagai contoh, \texttt{main.go} tidak perlu mengetahui detail SAT, sementara \texttt{intersect.go} tidak perlu memahami alur input pengguna. Dampaknya, modifikasi algoritma irisan atau strategi pembelahan ruang dapat dilakukan secara lokal tanpa mengubah keseluruhan pipeline.
+
+\section{Direktori Program}
+Struktur direktori implementasi disusun ringkas agar alur dependensi mudah dilacak dari titik masuk program sampai modul perhitungan geometri. Susunan utama proyek dapat dilihat pada blok berikut.
+
+\begin{verbatim}
+Tucil2_13524061_13524068/
+|- README.md
+|- docs/
+|  |- main.tex
+|  |- sections/
+|     |- 03-implementasi.tex
+|- src/
+|  |- main.go
+|  |- packages/
+|     |- parser/
+|     |  |- parser.go
+|     |- intersect/
+|     |  |- intersect.go
+|     |- octree/
+|        |- octree.go
+|- test/
+\end{verbatim}
+
+Direktori \texttt{src} berperan sebagai inti source code, sedangkan \texttt{docs} memuat dokumen laporan. Pemisahan ini mendukung workflow pengembangan yang jelas karena perubahan implementasi dan perubahan dokumentasi dapat dikelola secara paralel tanpa saling mengganggu struktur masing-masing.
+
+\section{Snippet Tiap File dan Penjelasan}
+
+\subsection{main.go}
+\begin{tcblisting}{
+        title={Snippet main.go},
+        colback=gray!2,
+        colframe=black!60,
+        listing only,
+        breakable
+    }
+    verts, faces, err := parser.ParseOBJ(path)
+    if err != nil {
+            fmt.Println("Error:", err)
+            os.Exit(1)
+        }
+
+    bbMin, bbMax := octree.BoundingBox(verts)
+    root := &octree.Octree{Min: bbMin, Max: bbMax}
+    pruned := map[int]int{}
+    octree.Build(root, verts, faces, 0, maxDepth, pruned)
+\end{tcblisting}
+
+Potongan ini menunjukkan peran \texttt{main.go}. Setelah data model berhasil diparsing, berkas ini membangun root octree dari bounding box global dan mengeksekusi rekursi utama. Dengan demikian, \texttt{main.go} berfungsi sebagai titik integrasi antar modul dan menjadi tempat penyusunan statistik hasil eksekusi.
+
+\subsection{parser.go}
+\begin{tcblisting}{
+        title={Snippet parser.go},
+        colback=gray!2,
+        colframe=black!60,
+        listing only,
+        breakable
+    }
+    switch parts[0] {
+            case "v":
+            x, err1 := strconv.ParseFloat(parts[1], 64)
+            y, err2 := strconv.ParseFloat(parts[2], 64)
+            z, err3 := strconv.ParseFloat(parts[3], 64)
+            if err1 != nil || err2 != nil || err3 != nil {
+                    return nil, nil, fmt.Errorf("invalid vertex")
+                }
+            verts = append(verts, Vec3{x, y, z})
+            case "f":
+            i1, _ := strconv.Atoi(parts[1])
+            i2, _ := strconv.Atoi(parts[2])
+            i3, _ := strconv.Atoi(parts[3])
+            faces = append(faces, Face{i1 - 1, i2 - 1, i3 - 1})
+        }
+\end{tcblisting}
+
+Potongan ini menunjukkan fungsi \texttt{parser.go} sebagai lapisan translasi data. Format teks OBJ yang bersifat eksternal diubah ke representasi internal yang siap dihitung oleh algoritma geometri. Konversi indeks dari 1-based ke 0-based dilakukan agar akses ke array vertex di Go konsisten dan aman.
+
+\subsection{intersect.go}
+\begin{tcblisting}{
+        title={Snippet intersect.go},
+        colback=gray!2,
+        colframe=black!60,
+        listing only,
+        breakable
+    }
+    for _, axis := range axes {
+    if dot(axis, axis) < 1e-10 {
+    continue
+    }
+    tMin, tMax := projectTriangle(axis, v0, v1, v2)
+    bMin, bMax := projectBox(axis, parser.Vec3{}, half)
+    if !overlaps(tMin, tMax, bMin, bMax) {
+            return false
+        }
+    }
+\end{tcblisting}
+
+Kode ini merepresentasikan peran dari \texttt{intersect.go}. Setiap sumbu kandidat digunakan untuk menguji kemungkinan adanya sumbu pemisah antara segitiga dan box. Ketika satu sumbu gagal overlap, proses dihentikan lebih awal.
+
+\subsection{octree.go}
+\begin{tcblisting}{
+        title={Snippet octree.go (Bounding Box DnC)},
+        colback=gray!2,
+        colframe=black!60,
+        listing only,
+        breakable
+    }
+    func boundingBoxDivideConquer(verts []parser.Vec3, left, right int) (parser.Vec3, parser.Vec3) {
+            if left == right {
+                    return verts[left], verts[left]
+                }
+            mid := left + (right-left)/2
+            leftMin, leftMax := boundingBoxDivideConquer(verts, left, mid)
+            rightMin, rightMax := boundingBoxDivideConquer(verts, mid+1, right)
+            return mergeBounds(leftMin, leftMax, rightMin, rightMax)
+        }
+\end{tcblisting}
+
+\begin{tcblisting}{
+        title={Snippet octree.go (Build dan Pruning)},
+        colback=gray!2,
+        colframe=black!60,
+        listing only,
+        breakable
+    }
+    for i := 0; i < 8; i++ {
+    child := MakeOctant(node.Min, node.Max, mid, i)
+    if intersect.TriBoxIntersect(child.Min, child.Max, verts, faces) {
+            node.Children[i] = child
+            Build(child, verts, faces, depth+1, maxDepth, prunedCounts)
+        } else {
+            prunedCounts[depth+1]++
+        }
+    }
+\end{tcblisting}
+
+Dua potongan ini menunjukkan bahwa cara kerja dari \texttt{octree.go}. Potongan pertama menghitung batas global secara rekursif, sedangkan potongan kedua mengimplementasikan pembelahan ruang dan pruning berbasis uji irisan. Kombinasi keduanya menjadikan jumlah node yang diproses tetap terkendali sambil mempertahankan representasi voxel yang mengikuti bentuk objek.
