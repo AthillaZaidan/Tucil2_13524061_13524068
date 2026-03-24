@@ -1,0 +1,12 @@
+# Edge case: degenerate triangle (collinear points)
+# Expected: parser passes, geometry is zero-area
+v 0 0 0
+v 1 1 1
+v 2 2 2
+f 1 2 3
+
+
+
+
+
+

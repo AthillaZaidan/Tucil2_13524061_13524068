@@ -1,0 +1,10 @@
+# Edge case: face index starts from 0
+# Expected parser error: face index must be >= 1
+v 0 0 0
+v 1 0 0
+v 0 1 0
+f 0 1 2
+
+
+
+

@@ -1,0 +1,7 @@
+# Edge case: empty OBJ (no vertex and no face)
+# Expected parser error: no vertices found in file
+
+
+
+
+

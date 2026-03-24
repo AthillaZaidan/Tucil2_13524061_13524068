@@ -1,0 +1,10 @@
+# Edge case: vertices exist, but no face
+# Expected parser error: no faces found in file
+v 0 0 0
+v 1 0 0
+v 0 1 0
+
+
+
+
+

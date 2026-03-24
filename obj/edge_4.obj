@@ -1,0 +1,9 @@
+# Edge case: face references non-existing vertex index
+# Expected parser error: face references vertex out of range
+v 0 0 0
+v 1 0 0
+v 0 1 0
+f 1 2 4
+
+
+

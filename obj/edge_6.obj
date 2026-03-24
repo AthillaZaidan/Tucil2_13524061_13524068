@@ -1,0 +1,9 @@
+# Edge case: invalid vertex coordinate token
+# Expected parser error: invalid vertex coords
+v 0 0 0
+v a 1 0
+f 1 1 1
+
+
+
+

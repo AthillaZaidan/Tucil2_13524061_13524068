@@ -1,0 +1,14 @@
+# Edge case: extreme coordinate range
+# Expected: parser passes, tests bounding-box and numerical robustness
+v -1000000 -1000000 -1000000
+v 1000000 -1000000 -1000000
+v 0 1000000 1000000
+f 1 2 3
+
+
+
+
+
+
+
+
