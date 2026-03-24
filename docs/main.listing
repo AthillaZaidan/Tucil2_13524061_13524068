@@ -1,0 +1,9 @@
+    for i := 0; i < 8; i++ {
+    child := MakeOctant(node.Min, node.Max, mid, i)
+    if intersect.TriBoxIntersect(child.Min, child.Max, verts, faces) {
+            node.Children[i] = child
+            Build(child, verts, faces, depth+1, maxDepth, prunedCounts)
+        } else {
+            prunedCounts[depth+1]++
+        }
+    }

@@ -12,6 +12,8 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{float}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \bibliographystyle{IEEEtran}
 % ---------- Paket lain ----------
 \usepackage[most]{tcolorbox}
@@ -85,71 +87,71 @@
 \renewcommand{\footrulewidth}{0.4pt}
 
 \begin{document}
-	
-	\begin{titlepage}
-		\thispagestyle{empty}
-		\centering
-		
-		% ---------- Judul utama ----------
-		{\LARGE \textbf{Tugas Kecil 2}\par}
-		\vspace{0.2cm}
-		{\LARGE \textbf{Gemilang}\par}
-		\vspace{0.8cm}
-		{\large IF2211 | Strategi Algoritma\par}
-		\vspace{0.2cm}
-		{\large OctoVox : Konversi Model 3D Menjadi Voxel Menggunakan Octree Berbasis Divide and Conquer\par}
-		\vspace{0.2cm}
-		{\large Semester 2 Tahun 2025/2026\par}
-		
-		% ---------- Gambar tengah ----------
-		\vspace{1.8cm}
-		\includegraphics[width=0.9\textwidth]{foto-kelompok}\par
-		
-		% ---------- Disusun oleh ----------
-		\vspace{1.2cm}
-		{\bfseries Disusun oleh:\par}
-		\vspace{0.2cm}
-		\textbf{Gemilang}
-		\vspace{0.5cm} \\
-		\begin{tabular}{l l}
-			Muhammad Aufar Rizqi Kusuma & (13524061) \\
-			Athilla Zaidan Zidna Fann & (13524068) \\
-		\end{tabular}
-		
-		% ---------- Institusi ----------
-		\vspace{2.0cm}
-		Laboratorium Ilmu dan Rekayasa Komputasi\par
-		Program Studi Teknik Informatika\par
-		Sekolah Teknik Elektro dan Informatika\par
-		Institut Teknologi Bandung\par
-		
-	\end{titlepage}
-	
-	\clearpage
-	\pagestyle{fancy}
-	
-	\tableofcontents
-	\clearpage
-	
-	\chapter{Pendahuluan}
-	\input{sections/01-pendahuluan}
-	
-	\chapter{Dasar Teori}
-	\input{sections/02-dasar-teori}
-	
-	\chapter{Implementasi}
-	\input{sections/03-implementasi}
-	
-	\chapter{Eksperimen}
-	\input{sections/04-eksperimen}
-	
-	\chapter{Penutup}
-	\input{sections/05-penutup}
-	
-	\chapter{Lampiran}
-	\input{sections/06-lampiran}
 
-	\bibliography{dafpus}
-	\nocite{*}
+\begin{titlepage}
+	\thispagestyle{empty}
+	\centering
+
+	% ---------- Judul utama ----------
+	{\LARGE \textbf{Tugas Kecil 2}\par}
+	\vspace{0.2cm}
+	{\LARGE \textbf{Gemilang}\par}
+	\vspace{0.8cm}
+	{\large IF2211 | Strategi Algoritma\par}
+	\vspace{0.2cm}
+	{\large OctoVox : Konversi Model 3D Menjadi Voxel Menggunakan Octree Berbasis Divide and Conquer\par}
+	\vspace{0.2cm}
+	{\large Semester 2 Tahun 2025/2026\par}
+
+	% ---------- Gambar tengah ----------
+	\vspace{1.8cm}
+	\includegraphics[width=0.9\textwidth]{foto-kelompok}\par
+
+	% ---------- Disusun oleh ----------
+	\vspace{1.2cm}
+	{\bfseries Disusun oleh:\par}
+	\vspace{0.2cm}
+	\textbf{Gemilang}
+	\vspace{0.5cm} \\
+	\begin{tabular}{l l}
+		Muhammad Aufar Rizqi Kusuma & (13524061) \\
+		Athilla Zaidan Zidna Fann   & (13524068) \\
+	\end{tabular}
+
+	% ---------- Institusi ----------
+	\vspace{2.0cm}
+	Laboratorium Ilmu dan Rekayasa Komputasi\par
+	Program Studi Teknik Informatika\par
+	Sekolah Teknik Elektro dan Informatika\par
+	Institut Teknologi Bandung\par
+
+\end{titlepage}
+
+\clearpage
+\pagestyle{fancy}
+
+\tableofcontents
+\clearpage
+
+\chapter{Pendahuluan}
+\input{sections/01-pendahuluan}
+
+\chapter{Dasar Teori}
+\input{sections/02-dasar-teori}
+
+\chapter{Implementasi}
+\input{sections/03-implementasi}
+
+\chapter{Eksperimen}
+\input{sections/04-eksperimen}
+
+\chapter{Penutup}
+\input{sections/05-penutup}
+
+\chapter{Lampiran}
+\input{sections/06-lampiran}
+
+\bibliography{dafpus}
+\nocite{*}
 
 \end{document}
