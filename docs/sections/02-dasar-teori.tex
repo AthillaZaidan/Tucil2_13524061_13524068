@@ -1,8 +1,3 @@
-Bagian ini membahas konsep-konsep teoritis yang menjadi landasan pengembangan
-program OctoVox. Pemahaman terhadap konsep-konsep berikut diperlukan untuk
-memahami cara kerja algoritma \textit{voxelization} berbasis \textit{Octree} yang
-diimplementasikan.
-
 \section{Format File \textit{.obj}}
 
 Format \textit{Wavefront OBJ} (.obj) adalah format file teks yang digunakan
@@ -11,18 +6,18 @@ bersifat sederhana dan dapat dibaca langsung oleh manusia karena tersimpan dalam
 bentuk teks biasa. Setiap baris dalam file \texttt{.obj} mendefinisikan satu
 elemen geometri dengan awalan tertentu.
 
-Dalam konteks program OctoVox, hanya dua jenis elemen yang diproses:
+Dalam konteks program OctoVox, hanya dua jenis elemen yang diproses
 
 \begin{itemize}
     \item \textbf{Vertex} (\texttt{v}): mendefinisikan sebuah titik dalam ruang
-    tiga dimensi dengan koordinat $x$, $y$, dan $z$. Setiap \textit{vertex}
-    secara implisit memiliki nomor urut yang dimulai dari 1 sesuai urutan
-    kemunculannya dalam file.
+          tiga dimensi dengan koordinat $x$, $y$, dan $z$. Setiap \textit{vertex}
+          secara implisit memiliki nomor urut yang dimulai dari 1 sesuai urutan
+          kemunculannya dalam file.
 
     \item \textbf{Face} (\texttt{f}): mendefinisikan sebuah poligon dengan
-    mereferensikan indeks \textit{vertex} yang membentuknya. Pada program ini,
-    setiap \textit{face} diasumsikan berbentuk segitiga sehingga hanya terdiri
-    dari tiga indeks \textit{vertex}.
+          mereferensikan indeks \textit{vertex} yang membentuknya. Pada program ini,
+          setiap \textit{face} diasumsikan berbentuk segitiga sehingga hanya terdiri
+          dari tiga indeks \textit{vertex}.
 \end{itemize}
 
 Kumpulan \textit{face} yang saling terhubung membentuk apa yang disebut sebagai
@@ -48,12 +43,12 @@ titik maksimum $P_{\max} = (x_{\max}, y_{\max}, z_{\max})$, yang masing-masing
 merepresentasikan pojok terdekat dan pojok terjauh dari pusat koordinat.
 
 Nilai $P_{\min}$ dan $P_{\max}$ diperoleh dengan mencari nilai minimum dan
-maksimum dari koordinat seluruh \textit{vertex} objek pada setiap sumbu:
+maksimum dari koordinat seluruh \textit{vertex} objek pada setiap sumbu.
 
 \begin{align}
-    x_{\min} &= \min_{i} x_i, \quad x_{\max} = \max_{i} x_i \\
-    y_{\min} &= \min_{i} y_i, \quad y_{\max} = \max_{i} y_i \\
-    z_{\min} &= \min_{i} z_i, \quad z_{\max} = \max_{i} z_i
+    x_{\min} & = \min_{i} x_i, \quad x_{\max} = \max_{i} x_i \\
+    y_{\min} & = \min_{i} y_i, \quad y_{\max} = \max_{i} y_i \\
+    z_{\min} & = \min_{i} z_i, \quad z_{\max} = \max_{i} z_i
 \end{align}
 
 Dalam konteks \textit{voxelization} berbasis \textit{Octree}, AABB objek
@@ -76,15 +71,15 @@ dalam ruang tiga dimensi.
 
 \textit{Voxelization} adalah proses konversi representasi geometri kontinu, seperti
 \textit{polygon mesh}, menjadi representasi diskrit berbasis voksel. Terdapat dua
-jenis \textit{voxelization} yang umum dikenal:
+jenis \textit{voxelization} yang umum dikenal.
 
 \begin{itemize}
     \item \textbf{\textit{Surface voxelization}}: hanya menghasilkan voksel pada
-    bagian yang bersinggungan dengan permukaan objek. Jenis inilah yang
-    diimplementasikan dalam OctoVox.
+          bagian yang bersinggungan dengan permukaan objek. Jenis inilah yang
+          diimplementasikan dalam OctoVox.
 
     \item \textbf{\textit{Solid voxelization}}: menghasilkan voksel pada seluruh
-    ruang interior objek, tidak hanya pada permukaannya.
+          ruang interior objek, tidak hanya pada permukaannya.
 \end{itemize}
 
 Resolusi hasil \textit{voxelization} ditentukan oleh ukuran voksel yang digunakan.
@@ -104,26 +99,26 @@ bersamaan.
 
 \subsection{Terminologi}
 
-Beberapa istilah penting dalam \textit{Octree} adalah sebagai berikut:
+Beberapa istilah penting dalSam \textit{Octree} adalah sebagai berikut.
 
 \begin{itemize}
     \item \textbf{\textit{Root node}}: \textit{node} paling atas dalam hierarki
-    \textit{Octree} yang merepresentasikan seluruh ruang yang diperhitungkan,
-    dalam konteks ini adalah AABB objek.
+          \textit{Octree} yang merepresentasikan seluruh ruang yang diperhitungkan,
+          dalam konteks ini adalah AABB objek.
 
     \item \textbf{\textit{Internal node}}: \textit{node} yang memiliki delapan
-    \textit{node} anak dan merepresentasikan suatu sub-ruang yang masih perlu
-    diperhalus.
+          \textit{node} anak dan merepresentasikan suatu sub-ruang yang masih perlu
+          diperhalus.
 
     \item \textbf{\textit{Leaf node}}: \textit{node} yang tidak memiliki anak,
-    baik karena telah mencapai kedalaman maksimum maupun karena sub-ruang yang
-    diwakilinya dinyatakan kosong.
+          baik karena telah mencapai kedalaman maksimum maupun karena sub-ruang yang
+          diwakilinya dinyatakan kosong.
 
     \item \textbf{Kedalaman (\textit{depth})}: jarak suatu \textit{node} dari
-    \textit{root node}. \textit{Root node} berada pada kedalaman 0.
+          \textit{root node}. \textit{Root node} berada pada kedalaman 0.
 
     \item \textbf{Oktan}: salah satu dari delapan sub-kubus hasil pembagian suatu
-    \textit{node}.
+          \textit{node}.
 \end{itemize}
 
 \subsection{\textit{Pruning}}
@@ -137,7 +132,7 @@ komputasi secara keseluruhan.
 
 Jumlah \textit{node} pada kedalaman $d$ tanpa \textit{pruning} adalah $8^d$,
 sehingga total \textit{node} pada kedalaman maksimum $N$ tanpa \textit{pruning}
-adalah:
+adalah sebagai berikut.
 \begin{equation}
     \sum_{d=0}^{N} 8^d = \frac{8^{N+1} - 1}{7}
 \end{equation}
@@ -147,131 +142,131 @@ permukaan objek yang ditelusuri, sehingga jumlah \textit{node} yang diproses
 jauh lebih kecil dari nilai tersebut.
 
 \section{Algoritma \textit{Divide and Conquer}}
- 
+
 \textit{Divide and Conquer} adalah paradigma perancangan algoritma yang memecah
 suatu masalah menjadi beberapa sub-masalah yang lebih kecil dan bersifat serupa
 dengan masalah aslinya, menyelesaikan setiap sub-masalah secara rekursif, kemudian
 menggabungkan solusi dari setiap sub-masalah untuk menghasilkan solusi dari
 masalah asal. Secara umum, algoritma \textit{Divide and Conquer} terdiri dari
-tiga tahap:
- 
+tiga tahap sebagai berikut.
+
 \begin{enumerate}
     \item \textbf{\textit{Divide}}: membagi masalah menjadi beberapa sub-masalah
-    yang lebih kecil.
- 
+          yang lebih kecil.
+
     \item \textbf{\textit{Conquer}}: menyelesaikan setiap sub-masalah secara
-    rekursif. Apabila sub-masalah sudah cukup kecil, diselesaikan secara langsung
-    (\textit{base case}).
- 
+          rekursif. Apabila sub-masalah sudah cukup kecil, diselesaikan secara langsung
+          (\textit{base case}).
+
     \item \textbf{\textit{Combine}}: menggabungkan solusi dari seluruh sub-masalah
-    menjadi solusi masalah asal.
+          menjadi solusi masalah asal.
 \end{enumerate}
- 
+
 Rekursi pada algoritma \textit{Divide and Conquer} selalu memiliki satu atau lebih
 \textit{base case}, yaitu kondisi di mana masalah sudah cukup kecil sehingga dapat
 diselesaikan secara langsung tanpa rekursi lebih lanjut. Tanpa \textit{base case},
 rekursi akan berjalan tanpa henti.
- 
+
 \section{\textit{Triangle-Box Intersection} dan \textit{Separating Axis Theorem}}
- 
+
 \section{\textit{Separating Axis Theorem}}
- 
+
 \textit{Separating Axis Theorem} (SAT) adalah teorema dalam geometri komputasi
 yang menyatakan bahwa dua buah objek konveks tidak berpotongan jika dan hanya jika
 terdapat sebuah sumbu pemisah (\textit{separating axis}) di mana proyeksi kedua
 objek pada sumbu tersebut tidak saling tumpang tindih (\textit{overlap}).
- 
+
 Secara formal, untuk dua buah objek konveks $A$ dan $B$, keduanya tidak
-berpotongan jika terdapat sumbu $\hat{n}$ sedemikian sehingga:
+berpotongan jika terdapat sumbu $\hat{n}$ sedemikian sehingga
 \begin{equation}
     \max_{a \in A}(\hat{n} \cdot a) < \min_{b \in B}(\hat{n} \cdot b)
     \quad \text{atau} \quad
     \max_{b \in B}(\hat{n} \cdot b) < \min_{a \in A}(\hat{n} \cdot a)
 \end{equation}
- 
+
 Apabila tidak ditemukan sumbu pemisah dari seluruh kandidat sumbu yang diperiksa,
 maka kedua objek dipastikan berpotongan.
- 
+
 \section{\textit{Triangle-Box Intersection}}
- 
+
 Pengecekan apakah sebuah segitiga bersinggungan dengan sebuah AABB menggunakan
-SAT memerlukan pemeriksaan terhadap 13 kandidat sumbu, yaitu:
- 
+SAT memerlukan pemeriksaan terhadap 13 kandidat sumbu, yaitu,
+
 \begin{enumerate}
     \item \textbf{3 sumbu koordinat kubus}: sumbu $x$, $y$, dan $z$.
- 
+
     \item \textbf{1 sumbu normal segitiga}: vektor tegak lurus terhadap bidang
-    segitiga, diperoleh dari perkalian silang dua buah sisi segitiga:
-    \begin{equation}
-        \hat{n} = (V_1 - V_0) \times (V_2 - V_0)
-    \end{equation}
- 
+          segitiga, diperoleh dari perkalian silang dua buah sisi segitiga.
+          \begin{equation}
+              \hat{n} = (V_1 - V_0) \times (V_2 - V_0)
+          \end{equation}
+
     \item \textbf{9 sumbu dari perkalian silang}: kombinasi dari tiga buah sisi
-    segitiga ($e_0$, $e_1$, $e_2$) dengan tiga buah sumbu koordinat kubus
-    ($\hat{x}$, $\hat{y}$, $\hat{z}$):
-    \begin{equation}
-        \{e_i \times \hat{a} \mid i \in \{0, 1, 2\},\ \hat{a} \in \{\hat{x}, \hat{y}, \hat{z}\}\}
-    \end{equation}
+          segitiga ($e_0$, $e_1$, $e_2$) dengan tiga buah sumbu koordinat kubus
+          ($\hat{x}$, $\hat{y}$, $\hat{z}$):
+          \begin{equation}
+              \{e_i \times \hat{a} \mid i \in \{0, 1, 2\},\ \hat{a} \in \{\hat{x}, \hat{y}, \hat{z}\}\}
+          \end{equation}
 \end{enumerate}
- 
+
 Apabila ditemukan celah (\textit{gap}) pada proyeksi di salah satu dari 13 sumbu
 tersebut, maka segitiga dan kubus dipastikan tidak bersinggungan. Sebaliknya,
 apabila seluruh 13 sumbu menunjukkan tumpang tindih, maka segitiga dan kubus
 dipastikan bersinggungan.
- 
+
 \section{Konkurensi dan \textit{Goroutine} pada Bahasa Go}
- 
+
 \section{Konkurensi}
- 
+
 Konkurensi (\textit{concurrency}) adalah kemampuan suatu program untuk menjalankan
 beberapa tugas secara bersamaan atau tumpang tindih dalam waktu. Konkurensi berbeda
 dengan paralelisme (\textit{parallelism}): konkurensi berkaitan dengan struktur
 program yang memungkinkan beberapa tugas berjalan secara bersamaan, sedangkan
 paralelisme berkaitan dengan eksekusi fisik beberapa tugas secara simultan pada
 beberapa prosesor.
- 
+
 Dalam konteks \textit{voxelization}, konkurensi dapat dimanfaatkan untuk memproses
 beberapa cabang \textit{Octree} secara bersamaan, sehingga mempercepat keseluruhan
 proses komputasi.
- 
+
 \section{\textit{Goroutine}}
- 
+
 \textit{Goroutine} adalah unit eksekusi ringan (\textit{lightweight}) yang
 disediakan oleh bahasa pemrograman Go untuk mendukung konkurensi. Berbeda dengan
 \textit{thread} pada umumnya yang dikelola oleh sistem operasi, \textit{goroutine}
 dikelola oleh \textit{runtime} Go sehingga lebih efisien dalam penggunaan memori
 dan lebih cepat dalam pembuatan serta penghancurannya.
- 
+
 \textit{Goroutine} dibuat dengan menambahkan kata kunci \texttt{go} sebelum
 pemanggilan fungsi:
 \begin{verbatim}
 go namaFungsi(argumen)
 \end{verbatim}
- 
+
 Koordinasi antar \textit{goroutine} dilakukan melalui beberapa mekanisme yang
 disediakan Go, di antaranya:
- 
+
 \begin{itemize}
     \item \textbf{\textit{Channel}}: mekanisme komunikasi antar \textit{goroutine}
-    yang memungkinkan pengiriman dan penerimaan data secara aman.
- 
+          yang memungkinkan pengiriman dan penerimaan data secara aman.
+
     \item \textbf{\textit{WaitGroup}}: mekanisme sinkronisasi dari paket
-    \texttt{sync} yang memungkinkan sebuah \textit{goroutine} menunggu selesainya
-    sejumlah \textit{goroutine} lain.
- 
+          \texttt{sync} yang memungkinkan sebuah \textit{goroutine} menunggu selesainya
+          sejumlah \textit{goroutine} lain.
+
     \item \textbf{\textit{Mutex}}: mekanisme penguncian dari paket \texttt{sync}
-    yang memastikan hanya satu \textit{goroutine} yang mengakses sumber daya
-    bersama pada satu waktu, sehingga mencegah kondisi \textit{race condition}.
+          yang memastikan hanya satu \textit{goroutine} yang mengakses sumber daya
+          bersama pada satu waktu, sehingga mencegah kondisi \textit{race condition}.
 \end{itemize}
- 
+
 \section{\textit{3D Viewer}}
- 
+
 \textit{3D viewer} adalah perangkat lunak atau komponen program yang memungkinkan
 pengguna untuk menampilkan dan berinteraksi dengan model tiga dimensi secara
 visual. Dalam konteks OctoVox, \textit{3D viewer} diimplementasikan untuk
 menampilkan hasil \textit{voxelization} secara interaktif sehingga pengguna dapat
 memvisualisasikan model voksel yang dihasilkan dari berbagai sudut pandang.
- 
+
 Rendering model tiga dimensi pada \textit{3D viewer} umumnya memanfaatkan
 pustaka grafis seperti OpenGL atau pustaka berbasis Go seperti \texttt{go-gl} yang
 menyediakan antarmuka pemrograman untuk menggambar geometri tiga dimensi pada
